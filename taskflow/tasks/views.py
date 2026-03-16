@@ -1,20 +1,30 @@
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response    
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 
-from firebase_config import db
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-import uuid
-from datetime import datetime
 
-# REGISTRAR USUARIO
+# inicializar firestore
+if not firebase_admin._apps:
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+
+
+# REGISTRO DE USUARIO
+
 
 @api_view(['POST'])
-
+@authentication_classes([])
+@permission_classes([AllowAny])
 def registrar_usuario(request):
 
     username = request.data.get('username')
@@ -22,30 +32,41 @@ def registrar_usuario(request):
     password = request.data.get('password')
 
     if not username or not password:
-        return Response({
-            "error": "Datos incompletos"},
-            status=status.HTTP_400_BAD_REQUEST
+        return Response(
+            {"error": "Datos incompletos"},
+            status=400
         )
-    
+
     if User.objects.filter(username=username).exists():
-        return Response ({
-            "error": "El nombre de usuario ya existe"},
-            status=status.HTTP_400_BAD_REQUEST
+        return Response(
+            {"error": "El usuario ya existe"},
+            status=400
         )
-    
+
     user = User.objects.create_user(
         username=username,
-        email=email, 
-        password=password)
-    
-    return Response({
-        "message": "Usuario registrado exitosamente",
-        "user_id": user.id
-    }, status=status.HTTP_201_CREATED)
+        email=email,
+        password=password
+    )
 
-#INICIAR SESION
+    # guardar en firestore
+    db.collection("usuarios").add({
+        "username": username,
+        "email": email
+    })
+
+    return Response({
+        "message": "Usuario registrado correctamente"
+    })
+
+
+
+# LOGIN
+
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def iniciar_sesion(request):
 
     username = request.data.get('username')
@@ -53,120 +74,98 @@ def iniciar_sesion(request):
 
     user = authenticate(username=username, password=password)
 
-    if user is not None:
-
-        return Response({
-            "error": "Credenciales inválidas"},
-            status=status.HTTP_401_UNAUTHORIZED
+    if user is None:
+        return Response(
+            {"error": "Credenciales inválidas"},
+            status=401
         )
-    
+
     login(request, user)
 
     return Response({
-        "message": "Inicio de sesión exitoso",
-        "username": user.username
+        "message": "Inicio de sesión exitoso"
     })
 
-#CERRAR SESION
+
+
+# CREAR TAREA
+
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-
-def cerrar_sesion(request):
-
-    logout(request)
-
-    return Response({
-        "message": "Cierre de sesión exitoso"
-    })
-
-#CREAR TAREA
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def crear_tarea(request):
 
-    title = request.data.get("title")
-    description = request.data.get("description")
-    priority = request.data.get("priority")
-    due_date = request.data.get("due_date")
+    titulo = request.data.get('title')
+    descripcion = request.data.get('description')
 
-    if not title:
-        return Response({
-            "error": "El título es obligatorio"},
-            status=status.HTTP_400_BAD_REQUEST
+    if not titulo:
+        return Response(
+            {"error": "El titulo es obligatorio"},
+            status=400
         )
-    
-    task_id = str(uuid.uuid4())
 
-    task = {
-        "task_id": task_id,
-        "title": title,
-        "description": description,
-        "assigned_to": request.user.username,
-        "status": "pendiente",
-        "priority": priority,
-        "due_date": due_date,
-        "created_at": str(datetime.now())
-    }
-
-    db.collection("tasks").document(task_id).set(task)
-
-    return Response ({
-        "message": "Tarea creada exitosamente",
-        "task": task
-    })
-
-#LISTAR TAREAS
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-
-def listar_tareas(request):
-
-    tasks = []
-
-    docs = db.collection("tasks").stream()
-
-    for doc in docs: 
-        tasks.append(doc.to_dict())
-
-        return Response(tasks)
-    
-
-#ACTUALIZAR ESTADO DE TAREA
-    
-@api_view(['PUT'])
-@permission_classes([IsAuthenticated])
-
-def actualizar_estado_tarea(request, task_id):
-
-    new_status = request.data.get("status")
-
-    if not new_status:
-        return Response({
-            "error": "El nuevo estado de la tarea es obligatorio"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
-    
-    task_ref = db.colleection("tasks").document(task_id)
-
-    task_ref.update({
-        "status": new_status
+    db.collection("tareas").add({
+        "titulo": titulo,
+        "descripcion": descripcion
     })
 
     return Response({
-        "message": "Estado de la tarea actualizado correctamente"
+        "message": "Tarea creada correctamente"
     })
 
-#ELIMINAR TAREA
+
+
+# LISTAR TAREAS
+
+
+@api_view(['GET'])
+def listar_tareas(request):
+
+    tareas_ref = db.collection("tareas")
+    docs = tareas_ref.stream()
+
+    tareas = []
+
+    for doc in docs:
+        tarea = doc.to_dict()
+        tarea["id"] = doc.id
+        tareas.append(tarea)
+
+    return Response(tareas)
+
+
+
+# ACTUALIZAR TAREA
+
+
+@api_view(['PUT'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def actualizar_tarea(request, task_id):
+
+    titulo = request.data.get("titulo")
+    descripcion = request.data.get("descripcion")
+
+    tarea_ref = db.collection("tareas").document(task_id)
+
+    tarea_ref.update({
+        "titulo": titulo,
+        "descripcion": descripcion
+    })
+
+    return Response({
+        "message": "Tarea actualizada correctamente"
+    })
+
+# ELIMINAR TAREA
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-
+@authentication_classes([])
+@permission_classes([AllowAny])
 def eliminar_tarea(request, task_id):
 
-    db.collection("tasks").document(task_id).delete()
+    db.collection("tareas").document(task_id).delete()
 
     return Response({
         "message": "Tarea eliminada correctamente"

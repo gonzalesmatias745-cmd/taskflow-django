@@ -1,0 +1,48 @@
+### Registrar usuario
+POST http://127.0.0.1:8000/api/register/
+Content-Type: application/json
+
+{
+    "username": "juanitososo",
+    "email": "juanitososo@email.com",
+    "password": "123456"
+}
+
+
+### Login
+POST http://127.0.0.1:8000/api/login/
+Content-Type: application/json
+
+{
+    "username": "juanitososo",
+    "password": "123456"
+}
+
+
+### Crear tarea
+POST http://127.0.0.1:8000/api/tasks/create/
+Content-Type: application/json
+
+{
+    "title": "Terminar proyecto",
+    "description": "Backend de TaskFlow",
+    "priority": "alta",
+    "due_date": "2026-03-20"
+}
+
+
+### Ver tareas
+GET http://127.0.0.1:8000/api/tasks/
+
+
+### Actualizar estado
+PUT http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/update/
+Content-Type: application/json
+
+{
+    "status": "completada"
+}
+
+
+### Eliminar tarea
+DELETE http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/delete/
