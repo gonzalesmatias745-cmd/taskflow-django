@@ -3,21 +3,7 @@ import uuid
 from datetime import datetime
 
 
-def registrar_usuario(data):
 
-    user_id = str(uuid.uuid4())
-
-    user = {
-        "user_id": user_id,
-        "username": data["username"],
-        "email": data["email"],
-        "password": data["password"],
-        "created_at": datetime.now(),
-    }
-
-    db.collection("users").document(user_id).set(user)
-
-    return user
 
 def iniciar_sesion(email, password):
 
