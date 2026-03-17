@@ -19,6 +19,22 @@ def registrar_usuario(data):
 
     return user
 
+def iniciar_sesion(email, password):
+
+    users = db.collection("users").stream()
+
+    for doc in users:
+
+        user_data = doc.to_dict()
+
+        if user_data["email"] == email and user_data["password"] == password:
+
+            return {
+                "message": "Inicio de sesión exitoso",
+                "user" : user_data
+            }
+        
+    return {"error": "Credenciales inválidas"}
 
 
 
