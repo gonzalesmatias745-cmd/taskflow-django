@@ -3,24 +3,22 @@ import uuid
 from datetime import datetime
 
 
+def registrar_usuario(data):
 
+    user_id = str(uuid.uuid4())
 
-def iniciar_sesion(email, password):
+    user = {
+        "user_id": user_id,
+        "username": data["username"],
+        "email": data["email"],
+        "password": data["password"],
+        "created_at": datetime.now(),
+    }
 
-    users = db.collection("users").stream()
+    db.collection("users").document(user_id).set(user)
 
-    for doc in users:
+    return user
 
-        user_data = doc.to_dict()
-
-        if user_data["email"] == email and user_data["password"] == password:
-
-            return {
-                "message": "Inicio de sesión exitoso",
-                "user" : user_data
-            }
-        
-    return {"error": "Credenciales inválidas"}
 
 
 
