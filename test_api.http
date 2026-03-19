@@ -36,7 +36,7 @@ GET http://127.0.0.1:8000/api/tasks/
 
 
 ### Actualizar estado
-PUT http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/update/
+PUT http://127.0.0.1:8000/api/tasks/BaF31X1Y4KNSaqKvf6sl/update/
 Content-Type: application/json
 
 {
@@ -45,4 +45,4 @@ Content-Type: application/json
 
 
 ### Eliminar tarea
-DELETE http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/delete/
+DELETE http://127.0.0.1:8000/api/tasks/BaF31X1Y4KNSaqKvf6sl/delete/
