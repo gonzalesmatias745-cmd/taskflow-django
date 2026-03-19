@@ -1,5 +1,5 @@
 from api import login, obtener_tareas
-from ai import preguntar
+from cliente_ia.ai_cli import preguntar
 import getpass
 
 username = input("Usuario: ")
