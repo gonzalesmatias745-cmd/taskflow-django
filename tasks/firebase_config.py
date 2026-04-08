@@ -4,7 +4,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-cred_path = os.path.join(BASE_DIR, "serviceAccountKey.json")
+cred_path = os.path.join(os.path.dirname(__file__), "../serviceAccountKey.json")
 
 cred = credentials.Certificate(cred_path)
 

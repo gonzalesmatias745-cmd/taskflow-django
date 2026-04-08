@@ -12,4 +12,6 @@ urlpatterns = [
     path('tasks/<str:task_id>/update/', actualizar_tarea),
     path('tasks/<str:task_id>/delete/', eliminar_tarea),
 
+    path('tasks/counter/', cantidad_tareas)
+
 ]
