@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskFlow</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1 class="title">🚀 TaskFlow</h1>
+
+    <!-- LOGIN -->
+    <div id="login" class="card">
+        <h2>Bienvenido</h2>
+        <input type="text" id="username" placeholder="Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="login()">Ingresar</button>
+    </div>
+
+    <!-- APP -->
+    <div id="app" class="card hidden">
+
+        <div class="top-bar">
+            <h2>📋 Tus tareas</h2>
+            <span id="contador">0 tareas</span>
+        </div>
+
+        <div class="section">
+            <input type="text" id="title" placeholder="Título">
+            <input type="text" id="description" placeholder="Descripción">
+            <button onclick="crearTarea()">➕ Crear tarea</button>
+        </div>
+
+        <ul id="listaTareas"></ul>
+
+    </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script src="app.js"></script>
+
+</body>
+</html>

@@ -2,20 +2,11 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-
-import firebase_admin
-from firebase_admin import credentials, firestore
+from .firebase_config import db
 
 
-# inicializar firestore
-if not firebase_admin._apps:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
 
 
 
@@ -146,17 +137,21 @@ def actualizar_tarea(request, task_id):
 
     titulo = request.data.get("titulo")
     descripcion = request.data.get("descripcion")
+    estado = request.data.get("estado") 
 
     tarea_ref = db.collection("tareas").document(task_id)
 
-    tarea_ref.update({
-        "titulo": titulo,
-        "descripcion": descripcion
-    })
+    # Actualizamos solo lo que venga en el JSON
+    datos = {}
+    if titulo: datos["titulo"] = titulo
+    if descripcion: datos["descripcion"] = descripcion
+    if estado: datos["estado"] = estado 
 
-    return Response({
-        "message": "Tarea actualizada correctamente"
-    })
+    tarea_ref.update(datos)
+
+    return Response({"message": "Tarea actualizada correctamente"})
+
+
 
 # ELIMINAR TAREA
 
@@ -170,3 +165,47 @@ def eliminar_tarea(request, task_id):
     return Response({
         "message": "Tarea eliminada correctamente"
     })
+
+
+
+# OBTENER CANTIDAD DE TAREAS (ESTADISTICA) 
+@api_view(['GET'])
+def cantidad_tareas(request):
+    try:
+        tareas_ref = db.collection("tareas")
+        # Traemos los documentos una sola vez
+        docs = tareas_ref.stream()
+
+        # Inicializamos contadores
+        completada = 0
+        en_progreso = 0
+        pendientes = 0
+        cantidad_total = 0
+
+        # En un solo recorrido calculamos todo
+        for doc in docs:
+            cantidad_total += 1
+            tarea = doc.to_dict()
+            
+            # Es importante que el string coincida exactamente con lo que guardas
+            estado = tarea.get("estado", "pendiente").lower()  # Convertimos a minúsculas para evitar problemas de mayúsculas
+            
+            if estado == "completada":
+                completada += 1
+            elif estado == "en progreso":
+                en_progreso += 1
+            else:
+                pendientes += 1 
+
+        return Response({
+            "cantidad": cantidad_total,
+            "completada": completada,
+            "en_progreso": en_progreso,
+            "pendientes": pendientes
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": f"Error al obtener estadísticas: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

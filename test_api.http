@@ -8,7 +8,6 @@ Content-Type: application/json
     "password": "123456"
 }
 
-
 ### Login
 POST http://127.0.0.1:8000/api/login/
 Content-Type: application/json
@@ -18,31 +17,34 @@ Content-Type: application/json
     "password": "123456"
 }
 
-
 ### Crear tarea
 POST http://127.0.0.1:8000/api/tasks/create/
 Content-Type: application/json
 
 {
-    "title": "Terminar proyecto",
+    "title": "Finalizar",
     "description": "Backend de TaskFlow",
     "priority": "alta",
-    "due_date": "2026-03-20"
+    "due_date": "2026-03-20",
+    "estado": "pendiente",
+    "assigned_to": "juanitososo"
 }
-
 
 ### Ver tareas
 GET http://127.0.0.1:8000/api/tasks/
 
-
-### Actualizar estado
-PUT http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/update/
+### Actualizar tarea (title/desc)
+PUT http://127.0.0.1:8000/api/tasks/Tk6xaQ64q2kfByAau62E/update/
 Content-Type: application/json
 
 {
-    "status": "completada"
+    "titulo": "Proyecto actualizado",
+    "descripcion": "Backend completado",
+    "estado": "completada"
 }
 
+### Contador tareas
+GET http://127.0.0.1:8000/api/tasks/counter/
 
 ### Eliminar tarea
-DELETE http://127.0.0.1:8000/api/tasks/zy0JaOXMHgHEAkjhk2On/delete/
+DELETE http://127.0.0.1:8000/api/tasks/Tk6xaQ64q2kfByAau62E/delete/
