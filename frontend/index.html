@@ -1,38 +1,128 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>TaskFlow</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow - Gestión de Tareas</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i class="fas fa-tasks"></i> TaskFlow</h1>
+            <div id="userStatus" class="hidden">
+                <span id="usernameDisplay"></span>
+                <button id="logoutBtn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
 
-    <h1>TaskFlow</h1>
+        <!-- Auth Section -->
+        <section id="authSection" class="auth-section">
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="showLogin()">Login</button>
+                    <button class="tab-btn" onclick="showRegister()">Registrarse</button>
+                </div>
+                
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form active">
+                    <input type="text" id="loginUsername" placeholder="Usuario" required>
+                    <input type="password" id="loginPassword" placeholder="Contraseña" required>
+                    <button type="submit"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+                </form>
 
-    <!-- LOGIN -->
-    <div id="login">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Usuario">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button onclick="login()">Ingresar</button>
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form">
+                    <input type="text" id="regUsername" placeholder="Usuario" required>
+                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <input type="password" id="regPassword" placeholder="Contraseña" required>
+                    <button type="submit"><i class="fas fa-user-plus"></i> Registrarse</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- App Section -->
+        <main id="appSection" class="app-section hidden">
+            <!-- Stats Dashboard -->
+            <section class="stats-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card total">
+                        <i class="fas fa-tasks"></i>
+                        <div>
+                            <h3 id="totalTasks">0</h3>
+                            <span>Total</span>
+                        </div>
+                    </div>
+                    <div class="stat-card pending">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3 id="pendingTasks">0</h3>
+                            <span>Pendientes</span>
+                        </div>
+                    </div>
+                    <div class="stat-card progress">
+                        <i class="fas fa-spinner"></i>
+                        <div>
+                            <h3 id="progressTasks">0</h3>
+                            <span>En Progreso</span>
+                        </div>
+                    </div>
+                    <div class="stat-card completed">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <h3 id="completedTasks">0</h3>
+                            <span>Completadas</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="refresh-btn" onclick="loadStats(); cargarTareas();">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </section>
+
+            <!-- Create Task -->
+            <section class="task-form-section">
+                <button class="toggle-btn" onclick="toggleTaskForm()">
+                    <i class="fas fa-plus"></i> Nueva Tarea
+                </button>
+                <form id="taskForm" class="task-form hidden">
+                    <input type="hidden" id="editTaskId">
+                    <input type="text" id="taskTitle" placeholder="Título de la tarea" required>
+                    <textarea id="taskDescription" placeholder="Descripción (opcional)"></textarea>
+                    <select id="taskStatus">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En progreso">En Progreso</option>
+                        <option value="Completada">Completada</option>
+                    </select>
+                    <div class="form-actions">
+                        <button type="submit" id="saveTaskBtn">Crear Tarea</button>
+                        <button type="button" onclick="cancelEdit()" class="cancel-btn hidden">Cancelar</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Tasks List -->
+            <section class="tasks-section">
+                <h2><i class="fas fa-list"></i> Mis Tareas</h2>
+                <div id="loading" class="loading hidden">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando...
+                </div>
+                <ul id="taskList" class="task-list"></ul>
+                <div id="noTasks" class="no-tasks hidden">
+                    <i class="fas fa-inbox"></i>
+                    <p>No hay tareas. ¡Crea la primera!</p>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- APP -->
-    <div id="app" style="display:none;">
-        
-        <h2>Crear tarea</h2>
-        <input type="text" id="title" placeholder="Título">
-        <input type="text" id="description" placeholder="Descripción">
-        <button onclick="crearTarea()">Crear</button>
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden"></div>
 
-        <h2>Mis tareas</h2>
-        <button onclick="cargarTareas()">Actualizar lista</button>
-
-        <ul id="listaTareas"></ul>
-
-    </div>
-
-    <script src="app.js"></script>
-
+    <script src="/static/app.js"></script>
 </body>
 </html>
+

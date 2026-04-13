@@ -87,8 +87,9 @@ def iniciar_sesion(request):
 @permission_classes([AllowAny])
 def crear_tarea(request):
 
-    titulo = request.data.get('title')
-    descripcion = request.data.get('description')
+    titulo = request.data.get('titulo')
+    descripcion = request.data.get('descripcion')
+    estado = request.data.get('estado', 'pendiente')
 
     if not titulo:
         return Response(
@@ -98,7 +99,8 @@ def crear_tarea(request):
 
     db.collection("tareas").add({
         "titulo": titulo,
-        "descripcion": descripcion
+        "descripcion": descripcion,
+        "estado": estado
     })
 
     return Response({
@@ -111,6 +113,8 @@ def crear_tarea(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def listar_tareas(request):
 
     tareas_ref = db.collection("tareas")
@@ -170,6 +174,8 @@ def eliminar_tarea(request, task_id):
 
 # OBTENER CANTIDAD DE TAREAS (ESTADISTICA) 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def cantidad_tareas(request):
     try:
         tareas_ref = db.collection("tareas")
